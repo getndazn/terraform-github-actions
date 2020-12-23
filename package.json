@@ -1,0 +1,31 @@
+{
+  "name": "terraform-github-actions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/main.ts -o dist",
+    "lint": "eslint src/"
+  },
+  "devDependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^4.0.0",
+    "@types/shelljs": "^0.8.8",
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/parser": "^3.5.0",
+    "@zeit/ncc": "^0.22.3",
+    "eslint": "^7.4.0",
+    "shelljs": "0.8.4",
+    "typescript": "^3.9.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuperiu/terraform-github-actions.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kuperiu/terraform-github-actions/issues"
+  },
+  "homepage": "https://github.com/kuperiu/terraform-github-actions#readme"
+}

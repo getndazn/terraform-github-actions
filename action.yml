@@ -1,0 +1,25 @@
+name: terraform-github-actions
+
+inputs:
+  version: 
+    required: true
+  working_directory:
+    required: false
+  parallelism:
+    required: false
+  backend_config:
+    required: false 
+  var_file:
+    required: false 
+  plan:
+    required: false 
+  apply:
+    required: false 
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+
+branding:
+  color: purple
+  icon: send
