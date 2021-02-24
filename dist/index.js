@@ -1641,7 +1641,7 @@ function setVersion() {
 }
 function setWorkDir() {
     return __awaiter(this, void 0, void 0, function* () {
-        var workDir = core.getInput('working_directory');
+        let workDir = core.getInput('working_directory');
         if (shell.ls(workDir).code !== 0) {
             throw new Error(`working directory ` + workDir + ` doesn't exist`);
         }
@@ -1661,11 +1661,11 @@ function setWorkDir() {
 }
 function execTerraform() {
     return __awaiter(this, void 0, void 0, function* () {
-        //format 
+        // TF format
         if (shell.exec('terraform fmt -check').code !== 0) {
             throw new Error(`unable to format terraform`);
         }
-        //init
+        // TF init
         const backendConfig = core.getInput('backend_config');
         if (backendConfig) {
             if (shell.exec('terraform init -backend-config=' + backendConfig).code !== 0) {
@@ -1677,17 +1677,18 @@ function execTerraform() {
                 throw new Error(`unable to initilize terraform`);
             }
         }
-        //validate 
+        // TF validation
         if (shell.exec('terraform validate').code !== 0) {
             throw new Error(`unable to validate terraform`);
         }
-        //plan
         const plan = core.getInput('plan');
         const apply = core.getInput('apply');
+        const destroy = core.getInput('destroy');
         const varFile = core.getInput('var_file');
-        if (plan || apply) {
+        // TF destroy
+        if (destroy) {
             if (varFile) {
-                if (shell.exec('terraform plan -var-file=' + varFile + ' -out=tfplan.out').code !== 0) {
+                if (shell.exec(`terraform plan -var-file='${varFile}' -out=tfplan.out`).code !== 0) {
                     throw new Error(`unable to plan terraform`);
                 }
             }
@@ -1697,7 +1698,20 @@ function execTerraform() {
                 }
             }
         }
-        //apply
+        // TF plan
+        if (plan || apply) {
+            if (varFile) {
+                if (shell.exec(`terraform plan -var-file='${varFile}' -out=tfplan.out`).code !== 0) {
+                    throw new Error(`unable to plan terraform`);
+                }
+            }
+            else {
+                if (shell.exec('terraform plan -out=tfplan.out').code !== 0) {
+                    throw new Error(`unable to plan terraform`);
+                }
+            }
+        }
+        // TF apply
         if (apply) {
             if (shell.exec('terraform apply tfplan.out').code !== 0) {
                 throw new Error(`unable to apply terraform`);
