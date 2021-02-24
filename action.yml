@@ -1,20 +1,22 @@
 name: terraform-github-actions
 
 inputs:
-  version: 
+  version:
     required: true
   working_directory:
     required: false
   parallelism:
     required: false
   backend_config:
-    required: false 
+    required: false
   var_file:
-    required: false 
+    required: false
   plan:
-    required: false 
+    required: false
   apply:
-    required: false 
+    required: false
+  destroy:
+    required: false
 
 runs:
   using: 'node12'
