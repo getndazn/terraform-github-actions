@@ -66,18 +66,15 @@ async function execTerraform() {
         const destroy = core.getInput('destroy')
 
         const varFile = core.getInput('var_file')
+        const destroyTarget = core.getInput('destroy_target');
 
         // TF destroy
         if (destroy) {
-            if (varFile) {
-                if (shell.exec(`terraform destroy -var-file='${varFile}' --auto-approve`).code !== 0) {
-                    throw new Error(`unable to destroy terraform`)
-                }
-            }
-            else {
-                if (shell.exec('terraform destroy --auto-approve').code !== 0) {
-                    throw new Error(`unable to destroy terraform`)
-                }
+            const varCommand = varFile ? `-var-file='${varFile}` : '';
+            const destroyCommand = destroyTarget ? `-target='${destroyTarget}` : '';
+
+            if (shell.exec(`terraform destroy ${varCommand} --auto-approve ${destroyCommand}`).code !== 0) {
+                throw new Error(`unable to destroy terraform`)
             }
         }
 
