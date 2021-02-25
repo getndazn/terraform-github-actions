@@ -70,12 +70,12 @@ async function execTerraform() {
         // TF destroy
         if (destroy) {
             if (varFile) {
-                if (shell.exec(`terraform destroy -var-file='${varFile}'`).code !== 0) {
+                if (shell.exec(`terraform destroy -var-file='${varFile}' --auto-approve`).code !== 0) {
                     throw new Error(`unable to destroy terraform`)
                 }
             }
             else {
-                if (shell.exec('terraform destroy').code !== 0) {
+                if (shell.exec('terraform destroy --auto-approve').code !== 0) {
                     throw new Error(`unable to destroy terraform`)
                 }
             }
