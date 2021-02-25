@@ -1688,8 +1688,8 @@ function execTerraform() {
         const varFile = core.getInput('var_file');
         const destroyTarget = core.getInput('destroy_target');
         // Optional TF params
-        const varFileParam = varFile ? `-var-file='${varFile}` : '';
-        const destroyTargetParam = destroyTarget ? `-target='${destroyTarget}` : '';
+        const varFileParam = varFile ? `-var-file=${varFile}` : '';
+        const destroyTargetParam = destroyTarget ? `-target=${destroyTarget}` : '';
         // TF destroy
         if (destroy) {
             if (destroyTarget) {
