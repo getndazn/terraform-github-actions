@@ -1688,13 +1688,13 @@ function execTerraform() {
         // TF destroy
         if (destroy) {
             if (varFile) {
-                if (shell.exec(`terraform plan -var-file='${varFile}' -out=tfplan.out`).code !== 0) {
-                    throw new Error(`unable to plan terraform`);
+                if (shell.exec(`terraform destroy -var-file='${varFile}'`).code !== 0) {
+                    throw new Error(`unable to destroy terraform`);
                 }
             }
             else {
-                if (shell.exec('terraform plan -out=tfplan.out').code !== 0) {
-                    throw new Error(`unable to plan terraform`);
+                if (shell.exec('terraform destroy').code !== 0) {
+                    throw new Error(`unable to destroy terraform`);
                 }
             }
         }
