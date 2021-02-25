@@ -6,8 +6,7 @@
   "scripts": {
     "build": "ncc build src/main.ts -o dist",
     "git-add-dist": "git add ./dist",
-    "lint": "eslint . --ext .ts",
-    "ello": "echo helo"
+    "lint": "eslint . --ext .ts"
   },
   "devDependencies": {
     "@actions/core": "^1.2.4",
