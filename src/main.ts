@@ -15,100 +15,93 @@ async function setVersion() {
 }
 
 async function setWorkDir() {
-        let workDir = core.getInput('working_directory')
+    let workDir = core.getInput('working_directory')
 
-        if (shell.ls(workDir).code !== 0) {
-            throw new Error(`working directory ` + workDir + ` doesn't exist`)
+    if (shell.ls(workDir).code !== 0) {
+        throw new Error(`working directory ` + workDir + ` doesn't exist`)
+    }
+
+    //parallelism
+    const parallelism = core.getInput('parallelism')
+
+    if (parallelism !== "") {
+        if (shell.mkdir('-p', '_tf/' + parallelism).code !== 0) {
+            throw new Error(``)
         }
-
-        //parallelism
-        const parallelism = core.getInput('parallelism')
-
-        if (parallelism !== "") {
-            if (shell.mkdir('-p', '_tf/' + parallelism).code !== 0) {
-                throw new Error(``)
-            }
-            if (shell.cp('-R', workDir + '/*', '_tf/' + parallelism + '/').code !== 0) {
-                throw new Error(``)
-            }
-            workDir = '_tf/' + parallelism
+        if (shell.cp('-R', workDir + '/*', '_tf/' + parallelism + '/').code !== 0) {
+            throw new Error(``)
         }
+        workDir = '_tf/' + parallelism
+    }
 
-        shell.cd(workDir);
+    shell.cd(workDir);
 }
 
 async function execTerraform() {
-        // TF format
-        if (shell.exec('terraform fmt -check').code !== 0) {
-            throw new Error(`unable to format terraform`)
+    // TF format
+    if (shell.exec('terraform fmt -check').code !== 0) {
+        throw new Error(`unable to format terraform`)
+    }
+
+    // TF init
+    const backendConfig = core.getInput('backend_config')
+
+    if (backendConfig) {
+        if (shell.exec('terraform init -backend-config=' + backendConfig).code !== 0) {
+            throw new Error(`unable to initilize terraform`)
         }
+    } else {
+        if (shell.exec('terraform init').code !== 0) {
+            throw new Error(`unable to initilize terraform`)
+        }
+    }
 
-        // TF init
-        const backendConfig = core.getInput('backend_config')
+    // TF validation
+    if (shell.exec('terraform validate').code !== 0) {
+        throw new Error(`unable to validate terraform`)
+    }
 
-        if (backendConfig) {
-            if (shell.exec('terraform init -backend-config=' + backendConfig).code !== 0) {
-                throw new Error(`unable to initilize terraform`)
+    // GHA inputs
+    const plan = core.getInput('plan')
+    const apply = core.getInput('apply')
+    const destroy = core.getInput('destroy')
+    const varFile = core.getInput('var_file')
+    const destroyTarget = core.getInput('destroy_target');
+
+    // Optional TF params
+    const varFileParam = varFile ? `-var-file='${varFile}` : '';
+    const destroyTargetParam = destroyTarget ? `-target='${destroyTarget}` : '';
+
+    // TF destroy
+    if (destroy) {
+        if (destroyTarget) {
+            if (shell.exec(`terraform destroy ${varFileParam} --auto-approve ${destroyTargetParam}`).code !== 0) {
+                throw new Error(`unable to destroy terraform`)
+            }
+
+            if (shell.exec(`terraform destroy ${varFileParam} --auto-approve`).code !== 0) {
+                throw new Error(`unable to destroy terraform`)
             }
         } else {
-            if (shell.exec('terraform init').code !== 0) {
-                throw new Error(`unable to initilize terraform`)
+            if (shell.exec(`terraform destroy ${varFileParam} --auto-approve`).code !== 0) {
+                throw new Error(`unable to destroy terraform`)
             }
         }
+    }
 
-        // TF validation
-        if (shell.exec('terraform validate').code !== 0) {
-            throw new Error(`unable to validate terraform`)
+    // TF plan
+    if (plan || apply) {
+        if (shell.exec(`terraform plan ${varFileParam} -out=tfplan.out`).code !== 0) {
+            throw new Error(`unable to plan terraform`)
         }
+    }
 
-        const plan = core.getInput('plan')
-        const apply = core.getInput('apply')
-        const destroy = core.getInput('destroy')
-
-        const varFile = core.getInput('var_file')
-        const destroyTarget = core.getInput('destroy_target');
-
-        // TF destroy
-        if (destroy) {
-            const varCommand = varFile ? `-var-file='${varFile}` : '';
-
-            if (destroyTarget) {
-                const destroyCommand = destroyTarget ? `-target='${destroyTarget}` : '';
-
-                if (shell.exec(`terraform destroy ${varCommand} --auto-approve ${destroyCommand}`).code !== 0) {
-                    throw new Error(`unable to destroy terraform`)
-                }
-
-                if (shell.exec(`terraform destroy ${varCommand} --auto-approve`).code !== 0) {
-                    throw new Error(`unable to destroy terraform`)
-                }
-            } else {
-                if (shell.exec(`terraform destroy ${varCommand} --auto-approve`).code !== 0) {
-                    throw new Error(`unable to destroy terraform`)
-                }
-            }
+    // TF apply
+    if (apply) {
+        if (shell.exec('terraform apply tfplan.out').code !== 0) {
+            throw new Error(`unable to apply terraform`)
         }
-
-        // TF plan
-        if (plan || apply) {
-            if (varFile) {
-                if (shell.exec(`terraform plan -var-file='${varFile}' -out=tfplan.out`).code !== 0) {
-                    throw new Error(`unable to plan terraform`)
-                }
-            }
-            else {
-                if (shell.exec('terraform plan -out=tfplan.out').code !== 0) {
-                    throw new Error(`unable to plan terraform`)
-                }
-            }
-        }
-
-        // TF apply
-        if (apply) {
-            if (shell.exec('terraform apply tfplan.out').code !== 0) {
-                throw new Error(`unable to apply terraform`)
-            }
-        }
+    }
 }
 
 async function run() {

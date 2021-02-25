@@ -1681,40 +1681,35 @@ function execTerraform() {
         if (shell.exec('terraform validate').code !== 0) {
             throw new Error(`unable to validate terraform`);
         }
+        // GHA inputs
         const plan = core.getInput('plan');
         const apply = core.getInput('apply');
         const destroy = core.getInput('destroy');
         const varFile = core.getInput('var_file');
         const destroyTarget = core.getInput('destroy_target');
+        // Optional TF params
+        const varFileParam = varFile ? `-var-file='${varFile}` : '';
+        const destroyTargetParam = destroyTarget ? `-target='${destroyTarget}` : '';
         // TF destroy
         if (destroy) {
-            const varCommand = varFile ? `-var-file='${varFile}` : '';
             if (destroyTarget) {
-                const destroyCommand = destroyTarget ? `-target='${destroyTarget}` : '';
-                if (shell.exec(`terraform destroy ${varCommand} --auto-approve ${destroyCommand}`).code !== 0) {
+                if (shell.exec(`terraform destroy ${varFileParam} --auto-approve ${destroyTargetParam}`).code !== 0) {
                     throw new Error(`unable to destroy terraform`);
                 }
-                if (shell.exec(`terraform destroy ${varCommand} --auto-approve`).code !== 0) {
+                if (shell.exec(`terraform destroy ${varFileParam} --auto-approve`).code !== 0) {
                     throw new Error(`unable to destroy terraform`);
                 }
             }
             else {
-                if (shell.exec(`terraform destroy ${varCommand} --auto-approve`).code !== 0) {
+                if (shell.exec(`terraform destroy ${varFileParam} --auto-approve`).code !== 0) {
                     throw new Error(`unable to destroy terraform`);
                 }
             }
         }
         // TF plan
         if (plan || apply) {
-            if (varFile) {
-                if (shell.exec(`terraform plan -var-file='${varFile}' -out=tfplan.out`).code !== 0) {
-                    throw new Error(`unable to plan terraform`);
-                }
-            }
-            else {
-                if (shell.exec('terraform plan -out=tfplan.out').code !== 0) {
-                    throw new Error(`unable to plan terraform`);
-                }
+            if (shell.exec(`terraform plan ${varFileParam} -out=tfplan.out`).code !== 0) {
+                throw new Error(`unable to plan terraform`);
             }
         }
         // TF apply
