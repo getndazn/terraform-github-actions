@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/kuperiu/terraform-github-actions/issues"
   },
-  "homepage": "https://github.com/kuperiu/terraform-github-actions#readme"
+  "homepage": "https://github.com/kuperiu/terraform-github-actions#readme",
+  "dependencies": {
+    "husky": "^5.1.1"
+  }
 }
