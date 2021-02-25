@@ -17,6 +17,8 @@ inputs:
     required: false
   destroy:
     required: false
+  destroy_target:
+    required: false
 
 runs:
   using: 'node12'
