@@ -1623,98 +1623,86 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(__webpack_require__(470));
 const shell = __importStar(__webpack_require__(739));
+const core = __importStar(__webpack_require__(470));
 function setVersion() {
     return __awaiter(this, void 0, void 0, function* () {
         const version = core.getInput('version');
-        if (version == "") {
+        if (!version) {
             throw new Error(`version input parmater was not set`);
         }
-        if (shell.exec('tfenv install ' + version).code !== 0) {
-            throw new Error(`unable to install terraform ` + version);
+        if (shell.exec(`tfenv install ${version}`).code) {
+            throw new Error(`unable to install terraform ${version}`);
         }
-        if (shell.exec('tfenv use ' + version).code !== 0) {
-            throw new Error(`unable to set terraform ` + version);
+        if (shell.exec(`tfenv use ${version}`).code) {
+            throw new Error(`unable to set terraform ${version}`);
         }
     });
 }
 function setWorkDir() {
     return __awaiter(this, void 0, void 0, function* () {
-        let workDir = core.getInput('working_directory');
-        if (shell.ls(workDir).code !== 0) {
-            throw new Error(`working directory ` + workDir + ` doesn't exist`);
-        }
-        //parallelism
         const parallelism = core.getInput('parallelism');
-        if (parallelism !== "") {
-            if (shell.mkdir('-p', '_tf/' + parallelism).code !== 0) {
-                throw new Error(``);
+        let workDir = core.getInput('working_directory');
+        if (shell.ls(workDir).code) {
+            throw new Error(`working directory ${workDir} doesn't exist`);
+        }
+        if (parallelism) {
+            if (shell.mkdir('-p', `_tf/${parallelism}`).code) {
+                throw new Error();
             }
-            if (shell.cp('-R', workDir + '/*', '_tf/' + parallelism + '/').code !== 0) {
-                throw new Error(``);
+            if (shell.cp('-R', `${workDir}/*`, `_tf/${parallelism}/`).code) {
+                throw new Error();
             }
-            workDir = '_tf/' + parallelism;
+            workDir = `_tf/${parallelism}`;
         }
         shell.cd(workDir);
     });
 }
 function execTerraform() {
     return __awaiter(this, void 0, void 0, function* () {
-        // TF format
-        if (shell.exec('terraform fmt -check').code !== 0) {
-            throw new Error(`unable to format terraform`);
-        }
-        // TF init
-        const backendConfig = core.getInput('backend_config');
-        if (backendConfig) {
-            if (shell.exec('terraform init -backend-config=' + backendConfig).code !== 0) {
-                throw new Error(`unable to initilize terraform`);
-            }
-        }
-        else {
-            if (shell.exec('terraform init').code !== 0) {
-                throw new Error(`unable to initilize terraform`);
-            }
-        }
-        // TF validation
-        if (shell.exec('terraform validate').code !== 0) {
-            throw new Error(`unable to validate terraform`);
-        }
         // GHA inputs
         const plan = core.getInput('plan');
         const apply = core.getInput('apply');
         const destroy = core.getInput('destroy');
         const varFile = core.getInput('var_file');
         const destroyTarget = core.getInput('destroy_target');
+        const backendConfig = core.getInput('backend_config');
         // Optional TF params
         const varFileParam = varFile ? `-var-file=${varFile}` : '';
         const destroyTargetParam = destroyTarget ? `-target=${destroyTarget}` : '';
+        const backendConfigParam = backendConfig ? `-backend-config=${backendConfig}` : '';
+        // TF format
+        if (shell.exec('terraform fmt -check').code) {
+            throw new Error(`unable to format terraform`);
+        }
+        // TF init
+        if (shell.exec(`terraform init ${backendConfigParam}`).code) {
+            throw new Error(`unable to initilize terraform`);
+        }
+        // TF validation
+        if (shell.exec('terraform validate').code) {
+            throw new Error(`unable to validate terraform`);
+        }
         // TF destroy
         if (destroy) {
             if (destroyTarget) {
-                if (shell.exec(`terraform destroy ${varFileParam} --auto-approve ${destroyTargetParam}`).code !== 0) {
-                    throw new Error(`unable to destroy terraform`);
-                }
-                if (shell.exec(`terraform destroy ${varFileParam} --auto-approve`).code !== 0) {
+                if (shell.exec(`terraform destroy ${varFileParam} --auto-approve ${destroyTargetParam}`).code) {
                     throw new Error(`unable to destroy terraform`);
                 }
             }
-            else {
-                if (shell.exec(`terraform destroy ${varFileParam} --auto-approve`).code !== 0) {
-                    throw new Error(`unable to destroy terraform`);
-                }
+            if (shell.exec(`terraform destroy ${varFileParam} --auto-approve`).code) {
+                throw new Error(`unable to destroy terraform`);
             }
         }
         // TF plan
         if (plan || apply) {
-            if (shell.exec(`terraform plan ${varFileParam} -out=tfplan.out`).code !== 0) {
+            if (shell.exec(`terraform plan ${varFileParam} -out=tfplan.out`).code) {
                 throw new Error(`unable to plan terraform`);
             }
         }
         // TF apply
         if (apply) {
-            if (shell.exec('terraform apply tfplan.out').code !== 0) {
+            if (shell.exec('terraform apply tfplan.out').code) {
                 throw new Error(`unable to apply terraform`);
             }
         }
