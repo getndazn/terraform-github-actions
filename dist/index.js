@@ -1665,10 +1665,13 @@ function execTerraform() {
         const apply = core.getInput('apply');
         const destroy = core.getInput('destroy');
         const varFile = core.getInput('var_file');
+        const roleArn = core.getInput('role_arn');
         const destroyTarget = core.getInput('destroy_target');
         const backendConfig = core.getInput('backend_config');
         // Optional TF params
         const varFileParam = varFile ? `-var-file=${varFile}` : '';
+        const roleArnTfvarParam = roleArn ? `-var "role_arn=${roleArn}"` : '';
+        const roleArnConfigParam = roleArn ? `-backend-config="role_arn=${roleArn}"` : '';
         const destroyTargetParam = destroyTarget ? `-target=${destroyTarget}` : '';
         const backendConfigParam = backendConfig ? `-backend-config=${backendConfig}` : '';
         // TF format
@@ -1676,7 +1679,7 @@ function execTerraform() {
             throw new Error(`unable to format terraform`);
         }
         // TF init
-        if (shell.exec(`terraform init ${backendConfigParam}`).code) {
+        if (shell.exec(`terraform init ${backendConfigParam} ${roleArnConfigParam}`).code) {
             throw new Error(`unable to initilize terraform`);
         }
         // TF validation
@@ -1696,7 +1699,7 @@ function execTerraform() {
         }
         // TF plan
         if (plan || apply) {
-            if (shell.exec(`terraform plan ${varFileParam} -out=tfplan.out`).code) {
+            if (shell.exec(`terraform plan ${varFileParam} ${roleArnTfvarParam} -out=tfplan.out`).code) {
                 throw new Error(`unable to plan terraform`);
             }
         }
