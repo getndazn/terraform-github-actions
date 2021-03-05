@@ -19,6 +19,8 @@ inputs:
     required: false
   destroy_target:
     required: false
+  role_arn:
+    required: false
 
 runs:
   using: 'node12'
