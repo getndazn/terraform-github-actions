@@ -1680,11 +1680,11 @@ function execTerraform() {
         const currentAccountName = core.getInput('current_account_name');
         // Extract relevant account ID
         const role_arn = roleArn ? roleArn : generateAssumeRole(accountMapping, currentAccountName);
-        console.log(role_arn);
+        // Role ARN setup
+        const roleArnTfvarParam = `-var "role_arn=${role_arn}"`;
+        const roleArnConfigParam = `-backend-config="role_arn=${role_arn}"`;
         // Optional TF params
         const varFileParam = varFile ? `-var-file=${varFile}` : '';
-        const roleArnTfvarParam = roleArn ? `-var "role_arn=${role_arn}"` : '';
-        const roleArnConfigParam = roleArn ? `-backend-config="role_arn=${role_arn}"` : '';
         const destroyTargetParam = destroyTarget ? `-target=${destroyTarget}` : '';
         const backendConfigParam = backendConfig ? `-backend-config=${backendConfig}` : '';
         // TF format
