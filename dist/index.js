@@ -1658,23 +1658,13 @@ function setWorkDir() {
         shell.cd(workDir);
     });
 }
-function generateAssumeRole(accountMapping) {
-    // [
-    //     'dev=317566953396',
-    //     'test=133732118944',
-    //     'stage=247927184455',
-    //     'prod=365546661024'
-    //   ]
+function generateAssumeRole(accountMapping, currentAccountName) {
     const accounts = accountMapping.split(',')
         .reduce((acc, accountString) => {
         const [accountName, accountId] = accountString.split('=');
         return (Object.assign(Object.assign({}, acc), { [accountName]: accountId }));
     }, {});
-    // {
-    //   <accountName>: 000000000
-    // }
-    console.log(accounts);
-    return "TODO";
+    return `arn:aws:iam::${accounts[currentAccountName]}:role/automation-drone`;
 }
 function execTerraform() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -1687,8 +1677,10 @@ function execTerraform() {
         const destroyTarget = core.getInput('destroy_target');
         const backendConfig = core.getInput('backend_config');
         const accountMapping = core.getInput('account_mapping');
+        const currentAccountName = core.getInput('current_account_name');
         // Extract relevant account ID
-        const role_arn = roleArn ? roleArn : generateAssumeRole(accountMapping);
+        const role_arn = roleArn ? roleArn : generateAssumeRole(accountMapping, currentAccountName);
+        console.log(role_arn);
         // Optional TF params
         const varFileParam = varFile ? `-var-file=${varFile}` : '';
         const roleArnTfvarParam = roleArn ? `-var "role_arn=${role_arn}"` : '';

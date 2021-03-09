@@ -1,6 +1,10 @@
 import * as shell from 'shelljs'
 import * as core from '@actions/core'
 
+interface AccountMapping {
+    [accountName: string]: string
+}
+
 async function setVersion() {
     const version = core.getInput('version')
 
@@ -36,14 +40,8 @@ async function setWorkDir() {
     shell.cd(workDir);
 }
 
-function generateAssumeRole(accountMapping: string) { // accountName: string
-    // [
-    //     'dev=317566953396',
-    //     'test=133732118944',
-    //     'stage=247927184455',
-    //     'prod=365546661024'
-    //   ]
-    const accounts = accountMapping.split(',')
+function generateAssumeRole(accountMapping: string, currentAccountName: string) {
+    const accounts: AccountMapping = accountMapping.split(',')
         .reduce((acc, accountString) => {
             const [accountName, accountId] = accountString.split('=');
             return ({
@@ -52,13 +50,7 @@ function generateAssumeRole(accountMapping: string) { // accountName: string
             })
         }, {})
 
-    // {
-    //   <accountName>: 000000000
-    // }
-
-    console.log(accounts)
-
-    return "TODO"
+    return `arn:aws:iam::${accounts[currentAccountName]}:role/automation-drone`
 }
 
 async function execTerraform() {
@@ -71,9 +63,12 @@ async function execTerraform() {
     const destroyTarget = core.getInput('destroy_target')
     const backendConfig = core.getInput('backend_config')
     const accountMapping = core.getInput('account_mapping')
+    const currentAccountName = core.getInput('current_account_name')
 
     // Extract relevant account ID
-    const role_arn = roleArn ? roleArn : generateAssumeRole(accountMapping);
+    const role_arn = roleArn ? roleArn : generateAssumeRole(accountMapping, currentAccountName);
+
+    console.log(role_arn)
 
     // Optional TF params
     const varFileParam = varFile ? `-var-file=${varFile}` : ''
