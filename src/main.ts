@@ -36,12 +36,9 @@ async function setWorkDir() {
     shell.cd(workDir);
 }
 
-type AccountMapping = {
-    [accountName: string]: string
-}
-
-function generateAssumeRole(accountMapping: AccountMapping) {
-    console.log(accountMapping)
+function generateAssumeRole(accountMapping: string) {
+    const accounts = accountMapping.split(',')
+    console.log(accounts)
     return "TODO"
 }
 
@@ -54,7 +51,7 @@ async function execTerraform() {
     const roleArn = core.getInput('role_arn')
     const destroyTarget = core.getInput('destroy_target')
     const backendConfig = core.getInput('backend_config')
-    const accountMapping = JSON.parse(core.getInput('account_mapping'))
+    const accountMapping = core.getInput('account_mapping')
 
     // Extract relevant account ID
     const role_arn = roleArn ? roleArn : generateAssumeRole(accountMapping);
