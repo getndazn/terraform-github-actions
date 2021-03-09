@@ -1659,7 +1659,20 @@ function setWorkDir() {
     });
 }
 function generateAssumeRole(accountMapping) {
-    const accounts = accountMapping.split(',');
+    // [
+    //     'dev=317566953396',
+    //     'test=133732118944',
+    //     'stage=247927184455',
+    //     'prod=365546661024'
+    //   ]
+    const accounts = accountMapping.split(',')
+        .reduce((acc, accountString) => {
+        const [accountName, accountId] = accountString.split('=');
+        return (Object.assign(Object.assign({}, acc), { [accountName]: accountId }));
+    }, {});
+    // {
+    //   <accountName>: 000000000
+    // }
     console.log(accounts);
     return "TODO";
 }

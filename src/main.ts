@@ -36,9 +36,28 @@ async function setWorkDir() {
     shell.cd(workDir);
 }
 
-function generateAssumeRole(accountMapping: string) {
+function generateAssumeRole(accountMapping: string) { // accountName: string
+    // [
+    //     'dev=317566953396',
+    //     'test=133732118944',
+    //     'stage=247927184455',
+    //     'prod=365546661024'
+    //   ]
     const accounts = accountMapping.split(',')
+        .reduce((acc, accountString) => {
+            const [accountName, accountId] = accountString.split('=');
+            return ({
+                ...acc,
+                [accountName]: accountId
+            })
+        }, {})
+
+    // {
+    //   <accountName>: 000000000
+    // }
+
     console.log(accounts)
+
     return "TODO"
 }
 
