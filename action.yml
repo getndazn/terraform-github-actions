@@ -21,6 +21,8 @@ inputs:
     required: false
   role_arn:
     required: false
+  account_mapping:
+    required: false
 
 runs:
   using: 'node12'

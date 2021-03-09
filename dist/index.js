@@ -1658,6 +1658,10 @@ function setWorkDir() {
         shell.cd(workDir);
     });
 }
+function generateAssumeRole(accountMapping) {
+    console.log(accountMapping);
+    return "TODO";
+}
 function execTerraform() {
     return __awaiter(this, void 0, void 0, function* () {
         // GHA inputs
@@ -1668,10 +1672,13 @@ function execTerraform() {
         const roleArn = core.getInput('role_arn');
         const destroyTarget = core.getInput('destroy_target');
         const backendConfig = core.getInput('backend_config');
+        const accountMapping = JSON.parse(core.getInput('account_mapping'));
+        // Extract relevant account ID
+        const role_arn = roleArn ? roleArn : generateAssumeRole(accountMapping);
         // Optional TF params
         const varFileParam = varFile ? `-var-file=${varFile}` : '';
-        const roleArnTfvarParam = roleArn ? `-var "role_arn=${roleArn}"` : '';
-        const roleArnConfigParam = roleArn ? `-backend-config="role_arn=${roleArn}"` : '';
+        const roleArnTfvarParam = roleArn ? `-var "role_arn=${role_arn}"` : '';
+        const roleArnConfigParam = roleArn ? `-backend-config="role_arn=${role_arn}"` : '';
         const destroyTargetParam = destroyTarget ? `-target=${destroyTarget}` : '';
         const backendConfigParam = backendConfig ? `-backend-config=${backendConfig}` : '';
         // TF format
