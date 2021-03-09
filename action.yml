@@ -23,6 +23,8 @@ inputs:
     required: false
   account_mapping:
     required: false
+  account_name:
+    required: false
 
 runs:
   using: 'node12'
